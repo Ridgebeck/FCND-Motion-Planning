@@ -29,6 +29,23 @@ You're reading it! Below I describe how I addressed each rubric point and where 
 #### 1. Explain the functionality of what's provided in `motion_planning.py` and `planning_utils.py`
 These scripts contain a basic planning implementation that includes...
 
+`motion_planning.py`
+
+ - connect to simulator
+ - registering callbacks to messages returned from simulator
+ - local_position_callback():
+ 	 - when in state TAKEOFF: make sure the height is reached, then change to waypoint_transition(): change state to WAYPOINT, take next waypoint as target position, cmd_position()
+ 	 - when in state WAYPOINT: check if in vicinity (1m) of target location
+ 	 	- move to next waypoint or transition to landing if velocity is low enough (<1m/s), landing_transition(): change state to LANDING, land()
+ - velocity_callback():
+ 	 - when in state LANDING: check local and global position and transition to disarm, disarming_transition(): change state to DISARMING, disarm(), release_control()
+ - state_callback():
+ 	 - MANUAL --> arming transition: arm(), take_control()
+ 	 - ARMING: if armed plan path
+ 	 - PLANNING --> takeoff transition: change state to TAKEOFF, takeoff()
+ 	 - DISARMING: if not armed and guided --> manual_transition(): chnage state to MANUAL, stop(), set in_mission to False
+
+
 And here's a lovely image of my results (ok this image has nothing to do with it, but it's a nice example of how to include images in your writeup!)
 ![Top Down View](./misc/high_up.png)
 
