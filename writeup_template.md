@@ -4,7 +4,7 @@
 ---
 
 ### The goals of this project are:
-1. Loading a 2.5D map in the colliders.csv file describing the environment.
+1. Loading a 2.5D map from the colliders.csv file describing the environment.
 2. Discretize the environment into a grid or graph representation.
 3. Define the start and goal locations.
 4. Perform a search using A* or other search algorithm.
@@ -15,23 +15,20 @@
 
 ### General structure of the code
 
-The scripts `motion_planning.py` and `planning_utils.py` contain the basic planning implementation. 
+The scripts `motion_planning.py` and `planning_utils.py` contain the basic planning implementation. The following section describes the general structure of the code.
 
-#### `motion_planning.py`
+#### Basic Structure of `motion_planning.py`
 
- - connect to simulator
- - registering callbacks to messages returned from simulator
- - `local_position_callback()`:
- 	 - when in state TAKEOFF: make sure the height is reached, then change to `waypoint_transition()`: change state to WAYPOINT, take next waypoint as target position, `cmd_position()`
- 	 - when in state WAYPOINT: check if in vicinity (1m) of target location
- 	 	- move to next waypoint or transition to landing if velocity is low enough (<1m/s), `landing_transition()`: change state to LANDING, `land()`
- - `velocity_callback()`:
- 	 - when in state LANDING: check local and global position and transition to disarm, `disarming_transition()`: change state to DISARMING, `disarm()`, `release_control()`
- - state_callback():
- 	 - MANUAL --> arming transition: `arm()`, `take_control()`
- 	 - ARMING: if armed: `plan_path()`
- 	 - PLANNING --> takeoff transition: change state to TAKEOFF, `takeoff()`
- 	 - DISARMING: if not armed and guided --> `manual_transition()`: change state to MANUAL, `stop()`, set in_mission to False
+- connect to simulator
+- register three callback methods to messages returned from simulator - `state_callback()`, `local_position_callback()`, and `velocity_callback()`. The state diagram looks as follows:
+
+![State Diagram](./misc/state_diagram.png)
+
+
+- `state_callback()` is controlling the states from MANUAL to TAKEOFF and is calling the method `plan_path()`, where most of the project implementation takes place.
+- `local_position_callback()` is controlling the states from TAKEOFF to LANDING and is responsible for following the waypoints that are calculated by the path planing algorithm. This portion was not changed in this project.  
+- `velocity_callback()` is controlling the states from LANDING back to MANUAL and was also not modified in this project.
+
 
 - plan_path()
 	- define target altitude and safety distance
@@ -128,7 +125,7 @@ The diagonal example path has 471 waypoints, which complicates the navigation of
 
 ![Pruned Path](./misc/plot_path_pruned.png)
 
-The issue with this pruning method is that certain sections of the path can not be simplified as they do not fullfill the criteria of collinearity. Those zig-zag sections appera when the ideal path is close to a direction between rectangular and diagonal movement and two valid actions alternate (e.g. move NW, N, NW, N, NW, N,...). In the simulator those sections look like this: 
+The issue with this pruning method is that certain sections of the path can not be simplified as they do not fullfill the criteria of collinearity. Those zig-zag sections appear when the ideal path is close to a direction between rectangular and diagonal movement and two valid actions alternate (e.g. move NW, N, NW, N, NW, N,...). In the simulator those sections look like this: 
 
 ![Zig Zag](./misc/zig_zag_waypoints.png)
 
