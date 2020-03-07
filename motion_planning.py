@@ -133,7 +133,6 @@ class MotionPlanning(Drone):
         # set home position to (lon0, lat0, 0)
         self.set_home_position(lon0, lat0, 0.)
 
-        # TODO: retrieve current global position ? 
         # Convert to current local position using global_to_local()
         local_north, local_east, _ = global_to_local(self.global_position, self.global_home)
         
@@ -158,22 +157,7 @@ class MotionPlanning(Drone):
         print("North Max: {}".format(np.ceil(np.max(data[:, 0] + data[:, 3]))))
         print("East Max: {}".format(np.ceil(np.max(data[:, 1] + data[:, 4]))))
 
-        
-        # Set goal as some arbitrary position on the grid
-        '''
-        while True: 
-            rand_goal_n = int(np.random.randint(0.2*grid.shape[1], 0.8*grid.shape[0]))
-            #rand_goal_n = rand_goal_n - 1
-            rand_goal_e = int(np.random.randint(0.2*grid.shape[1], 0.8*grid.shape[1]))
-            if grid[rand_goal_n][rand_goal_e] == 0:
-                grid_goal = (rand_goal_n, rand_goal_e)
-                break
-        '''
-
-
-        # Adapt to set goal as latitude / longitude position and convert
-        #global_goal = [-122.3972262, 37.7926609, 0.] #+20m test position
-        global_goal = [-122.397550, 37.790777, 0.] #test position south behind building
+        # specify a few possible global goal locations        
         global_goals = np.asarray([
             [-122.397451, 37.792480, 0.],
             [-122.400499, 37.792931, 0.],
@@ -187,23 +171,17 @@ class MotionPlanning(Drone):
 
         random_goal = global_goals[np.random.randint(0, len(global_goals))]
 
-        #grid_goal = (468, 293) # test case to show issue with many waypoints
-
         print('Random Target Position: ', random_goal)
-
 
         local_goal_north, local_goal_east, _ = global_to_local(random_goal, self.global_home)
         grid_goal = (int(np.round(grid_start_north + local_goal_north)), int(np.round(grid_start_east + local_goal_east)))
-
-
-        print('Local Goal: ', grid_goal)
+        #grid_goal = (468, 293) # test case to show issue with zig-zag waypoints 
 
         # Run A* to find a path from start to goal
         # TODO: add diagonal motions with a cost of sqrt(2) to your A* implementation (done)
         # or move to a different search space such as a graph (not done here)
         print('Local Start and Goal: ', grid_start, grid_goal)
         path, _ = a_star(grid, heuristic, grid_start, grid_goal)
-
 
         # TODO: prune path to minimize number of waypoints (done)
         pruned_path = prune_path(path, epsilon=1e-2)

@@ -74,38 +74,53 @@ Here's | A | Snappy | Table
 ### Implementation of the Path Planning Algorithm
 
 #### 1. Set your global home position
-Here students should read the first line of the csv file, extract lat0 and lon0 as floating point values and use the self.set_home_position() method to set global home. Explain briefly how you accomplished this in your code.
+The first line of `colliders.csv` is read and the two values for `lat0` and `lon0` is extracted as float values. Those values are then used to set the global home position via the method `self.set_global_home_position()`.
 
+<a href="/motion_planning.py#L126-L134">see `motion_planning.py`, line 126-134</a>
 
-And here is a lovely picture of our downtown San Francisco environment from above!
-![Map of SF](./misc/map.png)
 
 #### 2. Set your current local position
-Here as long as you successfully determine your local position relative to global home you'll be all set. Explain briefly how you accomplished this in your code.
+The local position relative to the gloabl home position is calculated via the method `global_to_local()` from `frame_utils.py`.
 
+<a href="/motion_planning.py#L137">see `motion_planning.py`, line 137</a>
 
-Meanwhile, here's a picture of me flying through the trees!
-![Forest Flying](./misc/in_the_trees.png)
 
 #### 3. Set grid start position from local position
-This is another step in adding flexibility to the start location. As long as it works you're good to go!
+The method `create_grid()` from `planning_utils.py` is used to calculate the grid as well as the offset positions for both directions - north and east. The offsets are then substracted from the current local position values to receive the grid starting positions.
+
+<a href="/motion_planning.py#L145-L151">see `motion_planning.py`,  line 145-151</a>
+
 
 #### 4. Set grid goal position from geodetic coords
-This step is to add flexibility to the desired goal location. Should be able to choose any (lat, lon) within the map and have it rendered to a goal location on the grid.
+A couple of predefined global goal positions are saved in the numpy array `global_goals`. One goal is then randomly selected and converted into a local goal position in respect to the gloabl home position via `global_to_local()`. The respective grid goal position is then calculated by adding the grid starting positions to the north and east position values.
 
-#### 5. Modify A* to include diagonal motion (or replace A* altogether)
+<a href="/motion_planning.py#L161-L177">see `motion_planning.py`,  line 161-177</a>
 
-![NESW Path](./misc/plot_path_nesw.png)
 
-Minimal requirement here is to modify the code in planning_utils() to update the A* implementation to include diagonal motions on the grid that have a cost of sqrt(2), but more creative solutions are welcome. Explain the code you used to accomplish this step.
+#### 5. Modify A* to include diagonal motion
+The A* implementation `a_star()` in `planning_utils()` was used to find a path from the start to the goal position. Additional actions for going diagonally were added to the Actions class and the method `valid_actions()` was modified to remove those new actions in case of a collision with an obstacle or out of bounds condition.
 
-![Diagonal Path](./misc/plot_path_diagonal.png)
+<a href="/planning_utils.py#L54-L61">see `planning_utils.py`, line 54-61</a> and
+<a href="/planning_utils.py#L73-L101">line 73-101</a>
+
 
 #### 6. Cull waypoints 
 For this step you can use a collinearity test or ray tracing method like Bresenham. The idea is simply to prune your path of unnecessary waypoints. Explain the code you used to accomplish this step.
 
+
+
+
+### Comparing A* with different actions and showing the effect of pruning 
+
+![Map of SF](./misc/map.png)
+
+![NESW Path](./misc/plot_path_nesw.png)
+
+![Diagonal Path](./misc/plot_path_diagonal.png)
+
 ![Pruned Path](./misc/plot_path_pruned.png)
 
+![Zig Zag](./misc/zig_zag_waypoints.png)
 
 
 ### Execute the flight
