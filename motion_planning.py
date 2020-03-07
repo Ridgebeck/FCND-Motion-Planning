@@ -5,7 +5,7 @@ from enum import Enum, auto
 
 import numpy as np
 
-from planning_utils import a_star, heuristic, create_grid, prune_path
+from planning_utils import a_star, heuristic, create_grid, prune_path, prune_path_bres
 from udacidrone import Drone
 from udacidrone.connection import MavlinkConnection
 from udacidrone.messaging import MsgID
@@ -175,7 +175,7 @@ class MotionPlanning(Drone):
 
         local_goal_north, local_goal_east, _ = global_to_local(random_goal, self.global_home)
         grid_goal = (int(np.round(grid_start_north + local_goal_north)), int(np.round(grid_start_east + local_goal_east)))
-        #grid_goal = (468, 293) # test case to show issue with zig-zag waypoints 
+        grid_goal = (468, 293) # test case to show issue with zig-zag waypoints 
 
         # Run A* to find a path from start to goal
         # TODO: add diagonal motions with a cost of sqrt(2) to your A* implementation (done)
@@ -184,7 +184,8 @@ class MotionPlanning(Drone):
         path, _ = a_star(grid, heuristic, grid_start, grid_goal)
 
         # TODO: prune path to minimize number of waypoints (done)
-        pruned_path = prune_path(path, epsilon=1e-2)
+        #pruned_path = prune_path(path, epsilon=1e-2)
+        pruned_path = prune_path_bres(path, grid)
         print("Path length: {} vs. pruned path length: {}.".format(len(path), len(pruned_path)))
         # TODO (if you're feeling ambitious): Try a different approach altogether!
 

@@ -2,6 +2,8 @@ from enum import Enum
 from queue import PriorityQueue
 import numpy as np
 
+from bresenham import bresenham
+
 
 def create_grid(data, drone_altitude, safety_distance):
     """
@@ -258,3 +260,30 @@ def prune_path(path, epsilon=1e-2):
 
     return pruned_path
 
+
+def prune_path_bres(path, grid):
+    if path is not None:
+        pruned_path = [path[0]]
+        s, f = 0, 2
+        
+        while f < len(path):
+            cells = list(bresenham(path[s][0], path[s][1], path[f][0], path[f][1]))
+            obstacle = False
+
+            for c in cells:
+                if grid[c] == 1:
+                    obstacle = True
+                    break
+            
+            if obstacle == True:
+                pruned_path.append(path[f-1])
+                s = f - 1
+            
+            f = f + 1
+
+        pruned_path.append(path[-1])
+
+    else:
+        pruned_path = path
+
+    return pruned_path

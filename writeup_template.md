@@ -15,7 +15,7 @@
 
 ### General structure of the code
 
-The scripts `motion_planning.py` and `planning_utils.py` contain the basic planning implementation. Following 
+The scripts `motion_planning.py` and `planning_utils.py` contain the basic planning implementation. 
 
 #### `motion_planning.py`
 
@@ -58,18 +58,22 @@ The scripts `motion_planning.py` and `planning_utils.py` contain the basic plann
  	- `prune_path()`
 
 
+---
 
-And here's a lovely image of my results (ok this image has nothing to do with it, but it's a nice example of how to include images in your writeup!)
+
+### Environment / Map for this project
+
+This is the part of San Francisco that is used in this scenario (picture from Google Maps):
+
+![Map of SF](./misc/map.png)
+
+This is a zoomed in view of the same section in the simulator: 
+
 ![Top Down View](./misc/high_up.png)
 
-Here's | A | Snappy | Table
---- | --- | --- | ---
-1 | `highlight` | **bold** | 7.41
-2 | a | b | c
-3 | *italic* | text | 403
-4 | 2 | 3 | abcd
 
 ---
+
 
 ### Implementation of the Path Planning Algorithm
 
@@ -108,29 +112,36 @@ The A* implementation `a_star()` in `planning_utils()` was used to find a path f
 For this step you can use a collinearity test or ray tracing method like Bresenham. The idea is simply to prune your path of unnecessary waypoints. Explain the code you used to accomplish this step.
 
 
+---
 
 
-### Comparing A* with different actions and showing the effect of pruning 
-
-![Map of SF](./misc/map.png)
+### Comparing A* with different actions 
 
 ![NESW Path](./misc/plot_path_nesw.png)
 
 ![Diagonal Path](./misc/plot_path_diagonal.png)
 
+
+### Comparing different pruning methods
+
+The diagonal example path has 471 waypoints, which complicates the navigation of the drone. Therefore, different pruning methods were tested to remove waypoints based on different criteria. The first method was pruning based on a collinearity check implemented in `prune_path()` in `planning_utils.py`. The result was a pruned path with 106 waypoints that looks like this: 
+
 ![Pruned Path](./misc/plot_path_pruned.png)
+
+The issue with this pruning method is that certain sections of the path can not be simplified as they do not fullfill the criteria of collinearity. Those zig-zag sections appera when the ideal path is close to a direction between rectangular and diagonal movement and two valid actions alternate (e.g. move NW, N, NW, N, NW, N,...). In the simulator those sections look like this: 
 
 ![Zig Zag](./misc/zig_zag_waypoints.png)
 
+Therefore, an alternative pruning method using the Bresenham algorithm was implemented as well. The results of  `prune_path_bres()` of the same path can be seen in the following plot. 
 
-### Execute the flight
-#### 1. Does it work?
-It works!
+![Bresenham](./misc/plot_path_pruned_bres.png)
 
-### Double check that you've met specifications for each of the [rubric](https://review.udacity.com/#!/rubrics/1534/view) points.
-  
-# Extra Challenges: Real World Planning
+The same path section in the simulator now looks like this:
 
-For an extra challenge, consider implementing some of the techniques described in the "Real World Planning" lesson. You could try implementing a vehicle model to take dynamic constraints into account, or implement a replanning method to invoke if you get off course or encounter unexpected obstacles.
+![Zig Zag after Bres](./misc/bresenham_waypoints.png)
 
+### Next steps for improvement
 
+waypoint planning with heading
+vehicle model with dynamic constraints
+replanning if drone gets off course
