@@ -24,13 +24,12 @@ The scripts `motion_planning.py` and `planning_utils.py` contain the basic plann
 
 ![State Diagram](./misc/state_diagram.png)
 
+	- `state_callback()` is controlling the states from MANUAL to TAKEOFF and is calling the method `plan_path()`, where most of the project implementation takes place.
+	- `local_position_callback()` is controlling the states from TAKEOFF to LANDING and is responsible for following the waypoints that are calculated by the path planing algorithm. This portion was not changed in this project.  
+	- `velocity_callback()` is controlling the states from LANDING back to MANUAL and was also not modified in this project.
 
-- `state_callback()` is controlling the states from MANUAL to TAKEOFF and is calling the method `plan_path()`, where most of the project implementation takes place.
-- `local_position_callback()` is controlling the states from TAKEOFF to LANDING and is responsible for following the waypoints that are calculated by the path planing algorithm. This portion was not changed in this project.  
-- `velocity_callback()` is controlling the states from LANDING back to MANUAL and was also not modified in this project.
 
-
-- plan_path()
+- Structure of `plan_path()`:
 	- define target altitude and safety distance
 	- set target position height to target altitude
 	- read lattitude and longtitude from `colliders.csv` and set home position
@@ -44,15 +43,17 @@ The scripts `motion_planning.py` and `planning_utils.py` contain the basic plann
 	- convert path to waypoints, visualize them in simulator and follow them
 
 
-#### `planning_utils.py`
+#### Structure of `planning_utils.py`
 
- - contains the following methods:
- 	- `create_grid()`
- 	- `valid_actions()`
- 	- `a_star()`
- 	- `heuristic()`
- 	- `collinearity_check()`
- 	- `prune_path()`
+ -  `planning_utils.py` contains several functions that are used in the planning process:
+ 	- `create_grid()`: calculates a 2D grid from 2.5D map data and returns the grid as well as grid minimum values for north and east coordinates 
+ 	- `valid_actions()`: takes a current node and grid and looks through all possible actions to check if they are valid. A list of valid actions is then returned.
+ 	- `a_star_nesw()`: basic A* implementation that calculates a path from a start to a goal location; only takes the original actions moving north, east, south, and west
+ 	- `a_star()`: basic A* implementation that calculates a path from a start to a goal location; including diagonal movements as possible actions
+ 	- `heuristic()`: basic heuristic function calculating on Euclidean distance
+ 	- `collinearity_check()`: simple colinearity check of 3 points with given epsilon
+ 	- `prune_path()`: path pruning algorithm using the `collinearity_check()`
+ 	- `prune_path_bres()`: path pruning algorithm using Bresenham
 
 
 ---
